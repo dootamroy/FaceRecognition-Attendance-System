@@ -9,6 +9,8 @@ from datetime import datetime
 
 from Encoding import *
 from markAttendance import *
+from CaptureScreen import *
+
 
 path = 'Student_Images'  # Directory for fetching the student images.
 images = []  # List of all the images to be imported.
@@ -25,14 +27,9 @@ for img in myList:
 print(StudentNames)
 
 
-# FOR CAPTURING SCREEN RATHER THAN WEBCAM
-# def captureScreen(bbox=(300,300,690+300,530+300)):
-#     capScr = np.array(ImageGrab.grab(bbox))
-#     capScr = cv2.cvtColor(capScr, cv2.COLOR_RGB2BGR)
-#     return capScr
-
 encodeListKnown = findEncodings(images)    # Encoding all the images.
 print(f'Encoding Complete : {len(encodeListKnown)}')
+
 
 cap = cv2.VideoCapture(0)                  # Start capturing video.
 
@@ -61,5 +58,11 @@ while True:
             cv2.putText(img, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
             # markAttendance(name)
 
-            cv2.imshow('Webcam', img)
-            cv2.waitKey(1)
+    cv2.imshow('Webcam', img)
+    if cv2.waitKey(1) & 0xff == ord('q'):
+        break
+
+
+cap.release()
+# cv2.waitKey(0)
+cv2.destroyAllWindows()
