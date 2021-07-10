@@ -12,6 +12,8 @@ from markAttendance import *
 from CaptureScreen import *
 
 
+Capture = 0          # val 0 == [captures web cam] val 1 == [captures screen].
+
 path = 'Student_Images'  # Directory for fetching the student images.
 images = []  # List of all the images to be imported.
 StudentNames = []  # name of the student as pic name.
@@ -34,8 +36,12 @@ print(f'Encoding Complete : {len(encodeListKnown)}')
 cap = cv2.VideoCapture(0)                  # Start capturing video.
 
 while True:
-    success, img = cap.read()
-    # img = captureScreen()
+    if Capture == 0:                   # Condition for either capturing webcam or screen.
+        success, img = cap.read()
+
+    else:
+        img = captureScreen()
+
     imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
     imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
 
