@@ -2,6 +2,11 @@
 
 from datetime import datetime
 from datetime import date
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate("path/to/serviceAccountKey.json")
+firebase_admin.initialize_app(cred)                                       # Firebase initialization.
 
 today = date.today()
 
@@ -24,4 +29,3 @@ def markAttendance(name):
 
     # .............saving in FIREBASE.................#
 
-    
