@@ -1,24 +1,65 @@
+# created by Dootam Roy @2021
+
 import cv2
+import numpy as np
 import face_recognition
+import os
+from datetime import datetime
+# from PIL import ImageGrab
 
-imgElon = face_recognition.load_image_file('basic/elon.jpg')
-imgElon = cv2.cvtColor(imgElon, cv2.COLOR_BGR2RGB)
-imgTest = face_recognition.load_image_file('basic/bill.jpg')
-imgTest = cv2.cvtColor(imgTest, cv2.COLOR_BGR2RGB)
+from Encoding import *
+from markAttendance import *
 
-faceLoc = face_recognition.face_locations(imgElon)[0]
-encodeElon = face_recognition.face_encodings(imgElon)[0]
-cv2.rectangle(imgElon, (faceLoc[3], faceLoc[0]), (faceLoc[1], faceLoc[2]), (255, 255, 255), 2)
+path = 'Student_Images'  # Directory for fetching the student images.
+images = []  # List of all the images to be imported.
+StudentNames = []  # name of the student as pic name.
+myList = os.listdir(path)  # list of images.
+print(myList)
 
-faceLocTest = face_recognition.face_locations(imgTest)[0]
-encodeTest = face_recognition.face_encodings(imgTest)[0]
-cv2.rectangle(imgTest, (faceLocTest[3], faceLocTest[0]), (faceLocTest[1], faceLocTest[2]), (255, 255, 255), 2)
+# [Name of the Student's pic should be his/her name].
 
-results = face_recognition.compare_faces([encodeElon], encodeTest)
-faceDis = face_recognition.face_distance([encodeElon], encodeTest)
-print(results, faceDis)
-cv2.putText(imgTest, f'{results} {round(faceDis[0], 2)}', (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
+for img in myList:
+    curImg = cv2.imread(f'{path}/{img}')  # read the image.
+    images.append(curImg)
+    StudentNames.append(os.path.splitext(img)[0])
+print(StudentNames)
 
-cv2.imshow('Elon Musk', imgElon)
-cv2.imshow('Elon Test', imgTest)
-cv2.waitKey(0)
+
+# FOR CAPTURING SCREEN RATHER THAN WEBCAM
+# def captureScreen(bbox=(300,300,690+300,530+300)):
+#     capScr = np.array(ImageGrab.grab(bbox))
+#     capScr = cv2.cvtColor(capScr, cv2.COLOR_RGB2BGR)
+#     return capScr
+
+encodeListKnown = findEncodings(images)    # Encoding all the images.
+print(f'Encoding Complete : {len(encodeListKnown)}')
+
+cap = cv2.VideoCapture(0)                  # Start capturing video.
+
+while True:
+    success, img = cap.read()
+    # img = captureScreen()
+    imgS = cv2.resize(img, (0, 0), None, 0.25, 0.25)
+    imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+
+    facesCurFrame = face_recognition.face_locations(imgS)
+    encodesCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
+
+    for encodeFace, faceLoc in zip(encodesCurFrame, facesCurFrame):
+        matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
+        faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+        # print(faceDis)
+        matchIndex = np.argmin(faceDis)      # for finding index from the list faceDist which has the least distance.
+
+        if matches[matchIndex]:
+            name = StudentNames[matchIndex].upper()
+            # print(name)
+            y1, x2, y2, x1 = faceLoc
+            y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
+            cv2.putText(img, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
+            # markAttendance(name)
+
+            cv2.imshow('Webcam', img)
+            cv2.waitKey(1)
