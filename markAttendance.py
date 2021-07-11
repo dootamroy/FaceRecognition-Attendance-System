@@ -4,11 +4,16 @@ from datetime import datetime
 from datetime import date
 import firebase_admin
 from firebase_admin import credentials
+from firebase_admin import firestore
+from google.cloud.firestore_v1 import Increment
 
-cred = credentials.Certificate("path/to/serviceAccountKey.json")
+cred = credentials.Certificate("attendance-system-c0ba4-firebase-adminsdk-5x755-b8777eb046.json")
 firebase_admin.initialize_app(cred)                                       # Firebase initialization.
 
+db = firestore.client()
+
 today = date.today()
+date = today.strftime("%d/%m/%Y")
 
 
 def markAttendance(name):
@@ -23,9 +28,10 @@ def markAttendance(name):
 
         if name not in nameList:
             now = datetime.now()
-            date = today.strftime("%d/%m/%Y")
             dtString = now.strftime('%H:%M:%S')
             f.writelines(f'\n{name}, {date}, {dtString}')          # saves the name and time in the attendance.csv file.
-
-    # .............saving in FIREBASE.................#
+            # .............saving in FIREBASE.................#
+            ref = db.collection('Students').document(name)
+            ref.update({'NUM': Increment(1)})       # AUTO INCREAMENT and updation of val.
+            #db.collection('Students').document(name).update({'NUM': })
 
