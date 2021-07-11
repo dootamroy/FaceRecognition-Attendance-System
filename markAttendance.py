@@ -31,7 +31,14 @@ def markAttendance(name):
             dtString = now.strftime('%H:%M:%S')
             f.writelines(f'\n{name}, {date}, {dtString}')          # saves the name and time in the attendance.csv file.
             # .............saving in FIREBASE.................#
+            chk = db.collection('Students').document(name).get()    # check to see if the doc exists or not in the database.
             ref = db.collection('Students').document(name)
-            ref.update({'NUM': Increment(1)})       # AUTO INCREAMENT and updation of val.
-            #db.collection('Students').document(name).update({'NUM': })
+            if not chk.exists:
+                ref.set({'NUM': 1})
+            else:
+                ref.update({'NUM': Increment(+1)})            # AUTO INCREAMENT and updation of val.
+
+            # db.collection('Students').document(name).update({'NUM': })
+
+            ref.collection('AttendanceRecord').add({'date': date, 'time': dtString})
 
