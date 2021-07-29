@@ -12,7 +12,7 @@ from markAttendance import *
 from CaptureScreen import *
 
 
-Capture = 0          # val 0 == [captures web cam] val 1 == [captures screen].
+Capture = 0         # val 0 == [captures web cam] val 1 == [captures screen].
 
 path = 'Student_Images'  # Directory for fetching the student images.
 images = []  # List of all the images to be imported.
